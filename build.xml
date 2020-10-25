@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="usage" name="EquivalenceDataEjb">
+
+	<property file=".ant.properties" />
+	<property file="${user.home}/.ant.properties" />
+
+
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.2" />
+	<property name="source" value="1.3" />
+
+	<path id="ManejadorBalances.classpath">
+		<pathelement location="${manejadorbalances.home}/bin" />
+	</path>
+
+	<path id="EquivalenceDataEjb.classpath">
+		<path refid="ManejadorBalances.classpath" />
+	</path>
+
+	<!-- ################################################################################### -->
+
+
+	<property name="name" value="EquivalenceDataEjb" />
+
+	<property name="src.dir" value="ejbModule" />
+	<property name="dest.dir" value="ejbModule" />
+	<property name="build.dir" value="build" />
+	<property name="dist.dir" value="dist" />
+
+
+	<!--
+	 -->
+	<path id="master-classpath">
+		<fileset dir="${xdoclet.root}/lib">
+			<include name="xdoclet-1.2.3.jar" />
+			<include name="xdoclet-ejb-module-1.2.3.jar" />
+			<include name="xjavadoc-1.1.jar" />
+			<include name="commons-collections-2.0.jar" />
+			<include name="commons-logging.jar" />
+			<include name="xdoclet-jmx-module-1.2.3.jar" />
+			<include name="xdoclet-web-module-1.2.3.jar" />
+			<include name="xdoclet-jboss-module-1.2.3.jar" />
+			<include name="xdoclet-bea-module-1.2.3.jar" />
+		</fileset>
+		<fileset dir="${aplicaciones.root}">
+			<include name="log4j-1.2.15.jar" />
+		</fileset>
+		<fileset dir="${aplicaciones.root}">
+			<include name="j2ee.jar" />
+		</fileset>
+		<fileset dir="../BSSIntUtils/dist">
+			<include name="bssintutils.jar" />
+		</fileset>
+
+	</path>
+
+	<target name="usage">
+		<echo message="" />
+		<echo message="Available targets are:" />
+		<echo message="" />
+		<echo message="clean    --> Clean output dirs" />
+		<echo message="build    --> Compile main Java sources and copy libraries" />
+		<echo message="warfile  --> Build the web application archive" />
+		<echo message="all      --> Clean, build, warfile" />
+		<echo message="" />
+	</target>
+
+	<target name="clean" description="Clean output dirs (build, weblib, dist)">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<target name="ejbdoclet">
+		<taskdef name="ejbdoclet" classname="xdoclet.modules.ejb.EjbDocletTask" classpathref="master-classpath">
+		</taskdef>
+
+		<ejbdoclet destdir="${dest.dir}" excludedtags="@version,@author" addedtags="@xdoclet-generated at ${TODAY}" ejbspec="2.0">
+			<fileset dir="${src.dir}">
+				<include name="**/ManejadorBalanceMDBean.java" />
+			</fileset>
+
+			<dataobject />
+
+			<packageSubstitution packages="persistence" substituteWith="interfaces" />
+
+			<remoteinterface pattern="{0}" />
+			<localinterface pattern="{0}Local" />
+
+			<homeinterface pattern="{0}Home" />
+			<localhomeinterface pattern="{0}LocalHome" />
+
+			<entitypk />
+			<entitycmp />
+
+			<deploymentdescriptor destdir="${src.dir}/META-INF" />
+
+			<weblogic destdir="${build.dir}/META-INF" xmlencoding="UTF-8" validatexml="true" />
+
+		</ejbdoclet>
+	</target>
+
+
+	<target name="build" description="Compile main source tree java files into class files, generate jar files">
+		<mkdir dir="${build.dir}" />
+
+		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true" deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}" />
+			<classpath refid="master-classpath" />
+		</javac>
+
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml" />
+			</fileset>
+		</copy>
+
+		<mkdir dir="${dist.dir}" />
+
+		<jar jarfile="${dist.dir}/${name}.jar" compress="true" basedir="${build.dir}" manifest="${src.dir}/META-INF/MANIFEST.MF" />
+	</target>
+
+	<target name="all" depends="clean,ejbdoclet,build" description="Clean,build" />
+
+</project>
